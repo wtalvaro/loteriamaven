@@ -52,6 +52,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private int terceira_alta;
     private int total_sorteados;
     private int quantidade;
+    private int repeticoes;
 
     public enum ESPECULACAO_STATUS {
         PAR,
@@ -60,8 +61,9 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         MAIOR
     };
 
-    public SorteioBuilder(int quantidade) {
+    public SorteioBuilder(int quantidade, int repeticoes) {
         this.quantidade = quantidade;
+        this.repeticoes = repeticoes;
     }
 
     @Override
@@ -198,8 +200,29 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         }
     }
 
+
     @Override
-    public void executeEspeculacaoMenorMaior() {
+    public void executeEspeculacao() {
+        // TODO Implement this method
+        for (int i = 1; i <= this.repeticoes; i++) {
+            executeEspeculacaoMenorMaior();
+            executeEspeculacaoParImpar();
+            NavigableMap<Integer, Double> res = sorteio.getResultado_final();
+            int last = res.lastKey();
+            System.out.print("jogo " + i + " = ");
+            for (Map.Entry entry : res.entrySet()) {
+                if (Integer.parseInt(entry.getKey().toString()) == last) {
+                    System.out.print(entry.getKey());
+                    break;
+                }
+
+                System.out.print(entry.getKey() + " - ");
+            }
+            System.out.println();
+        }
+    }
+
+    private void executeEspeculacaoMenorMaior() {
         // TODO Implement this method
         double probabilidadeMenor = 0d;
         double probabilidadeMaior = 0d;
@@ -216,8 +239,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         }
     }
 
-    @Override
-    public void executeEspeculacaoParImpar() {
+    private void executeEspeculacaoParImpar() {
         // TODO Implement this method
         double probabilidadePar = 0d;
         double probabilidadeImpar = 0d;
@@ -265,7 +287,6 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         while (iterator_inserir.hasNext()) {
             Map.Entry me = (Map.Entry) iterator_inserir.next();
             if (Double.parseDouble(me.getValue().toString()) == 1) {
-                /// Alterar Aqui!!!!
                 treeMap.put(Integer.parseInt(me.getKey().toString()), Double.parseDouble(me.getValue().toString()));
                 dezenas.remove(me.getKey(), me.getValue());
                 n--;
