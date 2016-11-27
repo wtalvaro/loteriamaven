@@ -8,7 +8,7 @@ public class LoteriaDirector {
         this.builder = builder;
     }
 
-    public SorteioBuilder buildSorteio(int quantidade) {
+    public SorteioBuilder buildSorteio() {
         builder.createSorteio();
         builder.createSQLInstance();
         builder.executeConcursoSorteio();

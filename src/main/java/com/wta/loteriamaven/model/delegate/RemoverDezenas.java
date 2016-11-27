@@ -1,6 +1,8 @@
 package com.wta.loteriamaven.model.delegate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.NavigableMap;
 
 public interface RemoverDezenas {
     /**
@@ -13,8 +15,8 @@ public interface RemoverDezenas {
      * @param isPar
      * @return
      */
-    public ArrayList<Integer> doRemoverDezenas(ArrayList<Integer> vet, ArrayList<Integer> par,
-                                                           ArrayList<Integer> impar, Integer randomPar,
-                                                           Integer randomImpar, double p, boolean isPar);
+    public void doRemoverDezenas(Integer ultimo, ArrayList<Integer> par,
+                                                          ArrayList<Integer> impar, Integer randomPar,
+                                                          Integer randomImpar, double p);
 
 }
