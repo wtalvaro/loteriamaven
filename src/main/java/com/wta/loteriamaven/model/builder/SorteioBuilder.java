@@ -53,6 +53,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private int total_sorteados;
     private int quantidade;
     private int repeticoes;
+    private int linha;
 
     public enum ESPECULACAO_STATUS {
         PAR,
@@ -62,6 +63,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     };
 
     public SorteioBuilder(int quantidade, int repeticoes) {
+        if (quantidade < 29)
+            throw new IllegalArgumentException("A quantidade de dezenas não pode ser menor que 29. Por favor escolha um número que seja maior ou igual a 29.");
         this.quantidade = quantidade;
         this.repeticoes = repeticoes;
     }
@@ -205,20 +208,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     public void executeEspeculacao() {
         // TODO Implement this method
         for (int i = 1; i <= this.repeticoes; i++) {
+            this.linha = i;
             executeEspeculacaoMenorMaior();
             executeEspeculacaoParImpar();
-            NavigableMap<Integer, Double> res = sorteio.getResultado_final();
-            int last = res.lastKey();
-            System.out.print("jogo " + i + " = ");
-            for (Map.Entry entry : res.entrySet()) {
-                if (Integer.parseInt(entry.getKey().toString()) == last) {
-                    System.out.print(entry.getKey());
-                    break;
-                }
-
-                System.out.print(entry.getKey() + " - ");
-            }
-            System.out.println();
+            System.out.print(this.toString());
         }
     }
 
@@ -232,10 +225,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
 
         resultado_parcial = new TreeMap<Integer, Double>();
         if (this.metade_baixa > this.metade_alta) {
-            resultado_parcial = doRandom(12, probabilidadeMenor, dezenasEscolhidas, ESPECULACAO_STATUS.MENOR);
+            resultado_parcial = doRandom(14, probabilidadeMenor, dezenasEscolhidas, ESPECULACAO_STATUS.MENOR);
         }
         if (this.metade_alta > this.metade_baixa) {
-            resultado_parcial = doRandom(12, probabilidadeMaior, dezenasEscolhidas, ESPECULACAO_STATUS.MAIOR);
+            resultado_parcial = doRandom(14, probabilidadeMaior, dezenasEscolhidas, ESPECULACAO_STATUS.MAIOR);
         }
     }
 
@@ -390,6 +383,24 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             sortedHashMap.put(entry.getKey(), entry.getValue());
         }
         return sortedHashMap;
+    }
+
+
+    @Override
+    public String toString() {
+        // TODO Implement this method
+        NavigableMap<Integer, Double> res = sorteio.getResultado_final();
+        int last = res.lastKey();
+        StringBuilder sb = new StringBuilder();
+        sb.append("jogo " + linha + " = ");
+        for (Map.Entry entry : res.entrySet()) {
+            if (Integer.parseInt(entry.getKey().toString()) == last) {
+                sb.append(entry.getKey() + "\n");
+                break;
+            }
+            sb.append(entry.getKey() + " - ");
+        }
+        return sb.toString();
     }
 
     public NavigableMap<Integer, Double> getResultado_final() {

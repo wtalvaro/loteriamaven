@@ -5,7 +5,7 @@ import com.wta.loteriamaven.model.builder.SorteioBuilder;
 
 public class Loteria {
     public static void main(String[] args) {
-        SorteioBuilder sorteio = new SorteioBuilder(30, 30);
+        SorteioBuilder sorteio = new SorteioBuilder(45, 30);
         LoteriaDirector director = new LoteriaDirector(sorteio);
         sorteio = director.buildSorteio();
     }
