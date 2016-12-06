@@ -39,6 +39,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private NavigableMap<Integer, Double> resultado_final;
     private Map<Integer, Double> dezenasOrdenadas;
 
+    private ArrayList<String> resultadoPattern;
+
     private int totalNumeroSorteios;
     private int total_pares;
     private int total_impares;
@@ -67,6 +69,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             throw new IllegalArgumentException("A quantidade de dezenas não pode ser menor que 29. Por favor escolha um número que seja maior ou igual a 29.");
         this.quantidade = quantidade;
         this.repeticoes = repeticoes;
+        this.resultadoPattern = new ArrayList<String>();
     }
 
     @Override
@@ -396,8 +399,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         for (Map.Entry entry : res.entrySet()) {
             if (Integer.parseInt(entry.getKey().toString()) == last) {
                 sb.append(entry.getKey() + "\n");
+                resultadoPattern.add(entry.getKey().toString());
                 break;
             }
+            resultadoPattern.add(entry.getKey().toString());
             sb.append(entry.getKey() + " - ");
         }
         return sb.toString();
@@ -406,4 +411,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     public NavigableMap<Integer, Double> getResultado_final() {
         return resultado_final;
     }
+
+    public ArrayList<String> getResultadoPattern() {
+        return resultadoPattern;
+}
 }
