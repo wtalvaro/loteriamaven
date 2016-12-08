@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 public class Loteria {
     public static void main(String[] args) {
-        SorteioBuilder sorteio = new SorteioBuilder(60, 1881);
+        SorteioBuilder sorteio = new SorteioBuilder(60, 10);
         LoteriaDirector director = new LoteriaDirector(sorteio);
         sorteio = director.buildSorteio();
 
