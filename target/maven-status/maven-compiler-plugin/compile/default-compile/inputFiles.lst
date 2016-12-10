@@ -1,7 +1,10 @@
+/home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com.wta.loteriamaven.restful/GenericApplication.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/Loteria.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/model/delegate/OrdenarValor.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/model/delegate/RandomDezena.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/model/builder/LoteriaBuilder.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/model/builder/SorteioBuilder.java
+/home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/restful/PersonService.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/model/builder/LoteriaDirector.java
+/home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/restful/Person.java
 /home/wagner/Public/Projects/JDeveloper/LoteriaMaven/MegaSena/src/main/java/com/wta/loteriamaven/model/delegate/RemoverDezenas.java

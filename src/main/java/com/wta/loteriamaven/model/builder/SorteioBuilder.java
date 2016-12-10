@@ -36,9 +36,9 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private HashMap<Integer, Long> intervalosUltimoSorteio;
     private HashMap<Integer, Double> dezenasEscolhidas;
     private NavigableMap<Integer, Double> resultado_parcial;
-    private NavigableMap<Integer, Double> resultado_final;
+    private NavigableMap<Integer, Double> resultado_intermediario;
     private Map<Integer, Double> dezenasOrdenadas;
-
+    private ArrayList<Integer> resultado_final;
     private ArrayList<String> resultadoPattern;
 
     private int totalNumeroSorteios;
@@ -70,6 +70,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         this.quantidade = quantidade;
         this.repeticoes = repeticoes;
         this.resultadoPattern = new ArrayList<String>();
+        this.resultado_final = new ArrayList<Integer>();
     }
 
     @Override
@@ -171,12 +172,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         try {
             this.p_stmt = conn.prepareStatement("SELECT * FROM DEZENA");
             this.rs = p_stmt.executeQuery();
-
             Set<?> set_intervalo = null;
             Iterator<?> iterator_intervalo = null;
             set_intervalo = this.intervalosUltimoSorteio.entrySet();
             iterator_intervalo = set_intervalo.iterator();
-
             while (rs.next()) {
                 while (iterator_intervalo.hasNext()) {
                     Map.Entry me = (Map.Entry) iterator_intervalo.next();
@@ -188,12 +187,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
                     }
                 }
             }
-
             this.dezenasOrdenadas = doOrdenar(dezenasPeso, true);
             Set set_ordenar = dezenasOrdenadas.entrySet();
             Iterator iterator_ordenar = set_ordenar.iterator();
             this.dezenasEscolhidas = new HashMap<Integer, Double>();
-
             for (int i = 1; i <= quantidade; i++) {
                 if (iterator_ordenar.hasNext()) {
                     Map.Entry me = (Map.Entry) iterator_ordenar.next();
@@ -206,26 +203,12 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         }
     }
 
-
-    @Override
-    public void executeEspeculacao() {
-        // TODO Implement this method
-        for (int i = 1; i <= this.repeticoes; i++) {
-            this.linha = i;
-            executeEspeculacaoMenorMaior();
-            executeEspeculacaoParImpar();
-            System.out.print(this.toString());
-        }
-    }
-
     private void executeEspeculacaoMenorMaior() {
         // TODO Implement this method
         double probabilidadeMenor = 0d;
         double probabilidadeMaior = 0d;
-
         probabilidadeMenor = (double) this.metade_baixa / this.total_sorteados;
         probabilidadeMaior = (double) this.metade_alta / this.total_sorteados;
-
         resultado_parcial = new TreeMap<Integer, Double>();
         if (this.metade_baixa > this.metade_alta) {
             resultado_parcial = doRandom(14, probabilidadeMenor, dezenasEscolhidas, ESPECULACAO_STATUS.MENOR);
@@ -239,19 +222,35 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         // TODO Implement this method
         double probabilidadePar = 0d;
         double probabilidadeImpar = 0d;
-
         probabilidadePar = (double) this.total_pares / this.total_sorteados;
         probabilidadeImpar = (double) this.total_impares / this.total_sorteados;
-
-        resultado_final = new TreeMap<Integer, Double>();
+        resultado_intermediario = new TreeMap<Integer, Double>();
         if (this.total_pares > this.total_impares) {
-            resultado_final = doRandom(6, probabilidadePar, dezenasEscolhidas, ESPECULACAO_STATUS.PAR);
+            resultado_intermediario = doRandom(6, probabilidadePar, dezenasEscolhidas, ESPECULACAO_STATUS.PAR);
         }
         if (this.total_impares > total_pares) {
-            resultado_final = doRandom(6, probabilidadeImpar, dezenasEscolhidas, ESPECULACAO_STATUS.IMPAR);
+            resultado_intermediario = doRandom(6, probabilidadeImpar, dezenasEscolhidas, ESPECULACAO_STATUS.IMPAR);
+        }
+        Set set = resultado_intermediario.entrySet();
+        Iterator it = set.iterator();
+        ArrayList<Integer> map_converte = new ArrayList<Integer>();
+        while (it.hasNext()) {
+            Map.Entry me = (Map.Entry) it.next();
+            this.resultado_final.add(Integer.parseInt(me.getKey().toString()));
         }
     }
 
+    @Override
+    public void executeEspeculacao() {
+        // TODO Implement this method
+        for (int i = 1; i <= this.repeticoes; i++) {
+            this.linha = i;
+            executeEspeculacaoMenorMaior();
+            executeEspeculacaoParImpar();
+            System.out.print(this.toString());
+        }
+    }
+    
     @Override
     public void closeSQLInstance() {
         // TODO Implement this method
@@ -271,15 +270,11 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         NavigableMap<Integer, Double> treeMap = new TreeMap<Integer, Double>();
         ArrayList<Integer> primeira_especulacao = new ArrayList<Integer>();
         ArrayList<Integer> segunda_especulacao = new ArrayList<Integer>();
-
         Random generatorPrimeira = new Random();
         Random generatorSegunda = new Random();
-
         Integer dezena_escolhida = 0;
-
         Set<?> set_inserir = dezenas.entrySet();
         Iterator<?> iterator_inserir = set_inserir.iterator();
-
         while (iterator_inserir.hasNext()) {
             Map.Entry me = (Map.Entry) iterator_inserir.next();
             if (Double.parseDouble(me.getValue().toString()) == 1) {
@@ -288,10 +283,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
                 n--;
             }
         }
-
         Set<?> set_remover = dezenas.entrySet();
         Iterator<?> iterator_remover = set_remover.iterator();
-
         while (iterator_remover.hasNext()) {
             Map.Entry me = (Map.Entry) iterator_remover.next();
             if (Integer.parseInt(me.getKey().toString()) % 2 == 0) {
@@ -300,7 +293,6 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             }
             segunda_especulacao.add(Integer.parseInt(me.getKey().toString()));
         }
-
         for (int i = 0; i < n; i++) {
             Integer[] entriesPrimeira = primeira_especulacao.toArray(new Integer[primeira_especulacao.size()]);
             Integer[] entriesSegunda = segunda_especulacao.toArray(new Integer[segunda_especulacao.size()]);
@@ -309,24 +301,19 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
                 Integer.parseInt(entriesPrimeira[generatorPrimeira.nextInt(entriesPrimeira.length)].toString());
             Integer randomSegunda =
                 Integer.parseInt(entriesSegunda[generatorSegunda.nextInt(entriesSegunda.length)].toString());
-
             if (esp == ESPECULACAO_STATUS.PAR || esp == ESPECULACAO_STATUS.MENOR) {
                 dezena_escolhida = (Math.random() < p) ? randomPrimeira : randomSegunda;
                 treeMap.put(dezena_escolhida, 0d);
             }
-
             if (esp == ESPECULACAO_STATUS.IMPAR || esp == ESPECULACAO_STATUS.MAIOR) {
                 dezena_escolhida = (Math.random() < p) ? randomSegunda : randomPrimeira;
                 treeMap.put(dezena_escolhida, 0d);
             }
-
             doRemoverDezenas(dezena_escolhida, primeira_especulacao, segunda_especulacao, randomPrimeira, randomSegunda,
                              p);
         }
-
         Set<?> set_valor = dezenas.entrySet();
         Iterator<?> iterator_valor = set_valor.iterator();
-
         while (iterator_valor.hasNext()) {
             Map.Entry me = (Map.Entry) iterator_valor.next();
             for (Map.Entry<Integer, Double> entry : treeMap.entrySet()) {
@@ -335,7 +322,6 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
                     entry.setValue(Double.parseDouble(me.getValue().toString()));
             }
         }
-
         return treeMap;
     }
 
@@ -372,15 +358,12 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
                 return ((Comparable) ((Map.Entry) (o1)).getValue()).compareTo(((Map.Entry) (o2)).getValue());
             }
         });
-
         HashMap sortedHashMap = new LinkedHashMap();
         Iterator it = null;
-
         if (!isDescending)
             it = list.iterator();
         if (isDescending)
             it = list.descendingIterator();
-
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             sortedHashMap.put(entry.getKey(), entry.getValue());
@@ -388,11 +371,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         return sortedHashMap;
     }
 
-
     @Override
     public String toString() {
         // TODO Implement this method
-        NavigableMap<Integer, Double> res = sorteio.getResultado_final();
+        NavigableMap<Integer, Double> res = sorteio.getResultado_intermediario();
         int last = res.lastKey();
         StringBuilder sb = new StringBuilder();
         sb.append("jogo " + linha + " = ");
@@ -408,11 +390,15 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         return sb.toString();
     }
 
-    public NavigableMap<Integer, Double> getResultado_final() {
+    public NavigableMap<Integer, Double> getResultado_intermediario() {
+        return resultado_intermediario;
+    }
+
+    public ArrayList<Integer> getResultado_final() {
         return resultado_final;
     }
 
     public ArrayList<String> getResultadoPattern() {
         return resultadoPattern;
-}
+    }
 }
