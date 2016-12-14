@@ -5,12 +5,16 @@ import com.wta.loteriamaven.model.delegate.RandomDezena;
 import com.wta.loteriamaven.model.delegate.RemoverDezenas;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import java.text.SimpleDateFormat;
+
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
@@ -26,6 +30,13 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
+import weka.classifiers.rules.OneR;
+
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
+
 public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, RemoverDezenas, OrdenarValor {
     private PreparedStatement p_stmt;
     private ResultSet rs;
@@ -38,7 +49,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private NavigableMap<Integer, Double> resultado_parcial;
     private NavigableMap<Integer, Double> resultado_intermediario;
     private Map<Integer, Double> dezenasOrdenadas;
-    private ArrayList<Integer> resultado_final;
+    private NavigableMap<LocalDate, ArrayList<Integer>> resultado_final;
     private ArrayList<String> resultadoPattern;
 
     private int totalNumeroSorteios;
@@ -69,8 +80,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             throw new IllegalArgumentException("A quantidade de dezenas não pode ser menor que 29. Por favor escolha um número que seja maior ou igual a 29.");
         this.quantidade = quantidade;
         this.repeticoes = repeticoes;
-        this.resultadoPattern = new ArrayList<String>();
-        this.resultado_final = new ArrayList<Integer>();
+        this.resultado_final = new TreeMap<LocalDate, ArrayList<Integer>>();
     }
 
     @Override
@@ -231,13 +241,14 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         if (this.total_impares > total_pares) {
             resultado_intermediario = doRandom(6, probabilidadeImpar, dezenasEscolhidas, ESPECULACAO_STATUS.IMPAR);
         }
+        ArrayList<Integer> novoMapa = new ArrayList<Integer>();
         Set set = resultado_intermediario.entrySet();
         Iterator it = set.iterator();
-        ArrayList<Integer> map_converte = new ArrayList<Integer>();
         while (it.hasNext()) {
             Map.Entry me = (Map.Entry) it.next();
-            this.resultado_final.add(Integer.parseInt(me.getKey().toString()));
+            novoMapa.add(Integer.parseInt(me.getKey().toString()));
         }
+        this.resultado_final.put(LocalDate.now(), novoMapa);
     }
 
     @Override
@@ -247,10 +258,10 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             this.linha = i;
             executeEspeculacaoMenorMaior();
             executeEspeculacaoParImpar();
-            System.out.print(this.toString());
+            System.out.print(this.toString() + "\n");
         }
     }
-    
+
     @Override
     public void closeSQLInstance() {
         // TODO Implement this method
@@ -374,6 +385,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     @Override
     public String toString() {
         // TODO Implement this method
+        this.resultadoPattern = new ArrayList<String>();
         NavigableMap<Integer, Double> res = sorteio.getResultado_intermediario();
         int last = res.lastKey();
         StringBuilder sb = new StringBuilder();
@@ -387,6 +399,28 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             resultadoPattern.add(entry.getKey().toString());
             sb.append(entry.getKey() + " - ");
         }
+
+        try {
+            DataSource ds = new DataSource("src/main/resources/neuron.arff");
+            Instances ins = ds.getDataSet();
+            ins.setClassIndex(7);
+            OneR nb = new OneR();
+            nb.buildClassifier(ins);
+            Instance novo = new DenseInstance(8);
+            novo.setDataset(ins);
+            Long millis = System.currentTimeMillis();
+            novo.setValue(0, millis);
+            novo.setValue(1, Double.parseDouble(resultadoPattern.get(0)));
+            novo.setValue(2, Double.parseDouble(resultadoPattern.get(1)));
+            novo.setValue(3, Double.parseDouble(resultadoPattern.get(2)));
+            novo.setValue(4, Double.parseDouble(resultadoPattern.get(3)));
+            novo.setValue(5, Double.parseDouble(resultadoPattern.get(4)));
+            novo.setValue(6, Double.parseDouble(resultadoPattern.get(5)));
+            double probabilidade[] = nb.distributionForInstance(novo);
+            System.out.println("Sucesso: " + probabilidade[0] + " - Fracasso: " + probabilidade[1]);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         return sb.toString();
     }
 
@@ -394,8 +428,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         return resultado_intermediario;
     }
 
-    public ArrayList<Integer> getResultado_final() {
-        return resultado_final;
+    public TreeMap<LocalDate, ArrayList<Integer>> getResultado_final() {
+        return (TreeMap<LocalDate, ArrayList<Integer>>) resultado_final;
     }
 
     public ArrayList<String> getResultadoPattern() {
