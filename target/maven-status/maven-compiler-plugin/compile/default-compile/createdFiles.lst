@@ -1,8 +1,0 @@
-com/wta/loteriamaven/model/delegate/OrdenarValor.class
-com/wta/loteriamaven/model/builder/LoteriaBuilder.class
-com/wta/loteriamaven/model/builder/SorteioBuilder.class
-com/wta/loteriamaven/model/delegate/RemoverDezenas.class
-com/wta/loteriamaven/model/delegate/RandomDezena.class
-com/wta/loteriamaven/model/builder/LoteriaDirector.class
-com/wta/loteriamaven/model/builder/SorteioBuilder$1.class
-com/wta/loteriamaven/Loteria.class

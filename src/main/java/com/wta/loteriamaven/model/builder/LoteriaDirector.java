@@ -15,8 +15,7 @@ public class LoteriaDirector {
         builder.executeDezenaSorteio();
         builder.executeIntervaloSorteio();
         builder.executeOrdenarDezena();
-        builder.executeEspeculacaoMenorMaior();
-        builder.executeEspeculacaoParImpar();
+        builder.executeEspeculacao();
         return builder.getSorteio();
     }
 }
