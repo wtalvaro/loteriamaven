@@ -255,7 +255,6 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
 
     private void redeNeuralMegaSena(StringBuilder sb, ArrayList<String> resultado_padrao) {
         try {
-            data_neural = new DataSource("src/main/resources/neuron.arff");
             instance_neural = data_neural.getDataSet();
             instance_neural.setClassIndex(7);
             one_r = new OneR();
@@ -277,8 +276,14 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     }
 
     @Override
-    public void executeEspeculacao(boolean toString) {
+    public void executeEspeculacao(boolean toString, boolean build_neural) {
         // TODO Implement this method
+        if (build_neural)
+            try {
+                data_neural = new DataSource("src/main/resources/neuron.arff");
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         for (int i = 1; i <= this.repeticoes; i++) {
             this.linha = i;
             executeEspeculacaoMenorMaior();

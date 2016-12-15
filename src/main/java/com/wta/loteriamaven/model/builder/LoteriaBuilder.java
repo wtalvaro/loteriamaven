@@ -15,7 +15,7 @@ public abstract class LoteriaBuilder {
 
     public abstract void executeOrdenarDezena();
     
-    public abstract void executeEspeculacao(boolean toString);
+    public abstract void executeEspeculacao(boolean toString, boolean build_neural);
 
     public abstract void closeSQLInstance();
 

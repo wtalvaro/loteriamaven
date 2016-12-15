@@ -8,14 +8,14 @@ public class LoteriaDirector {
         this.builder = builder;
     }
 
-    public SorteioBuilder buildSorteio(boolean toString) {
+    public SorteioBuilder buildSorteio(boolean toString, boolean build_neural) {
         builder.createSorteio();
         builder.createSQLInstance();
         builder.executeConcursoSorteio();
         builder.executeDezenaSorteio();
         builder.executeIntervaloSorteio();
         builder.executeOrdenarDezena();
-        builder.executeEspeculacao(toString);
+        builder.executeEspeculacao(toString, build_neural);
         return builder.getSorteio();
     }
 }

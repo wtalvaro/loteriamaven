@@ -127,7 +127,7 @@ public class FileGenerator extends FileGeneratorBuilder {
     public StringBuilder dataTrueFalse(int dezenas, int repeticoes) {
         SorteioBuilder sorteio = new SorteioBuilder(dezenas, repeticoes);
         LoteriaDirector director = new LoteriaDirector(sorteio);
-        sorteio = director.buildSorteio(false);
+        sorteio = director.buildSorteio(false, false);
 
         this.entrada_fracasso = sorteio.getResultado_final();
 
@@ -147,7 +147,7 @@ public class FileGenerator extends FileGeneratorBuilder {
             }
             sb.append(",true");
             sb.append("\n");
-            
+
             ArrayList<Integer> dezena_fracasso = entrada_fracasso.get(j++);
             sb.append(data);
             for (int i = 0; i < dezena_fracasso.size(); i++) {
