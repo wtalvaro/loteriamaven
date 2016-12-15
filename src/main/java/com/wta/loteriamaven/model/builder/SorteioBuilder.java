@@ -5,16 +5,12 @@ import com.wta.loteriamaven.model.delegate.RandomDezena;
 import com.wta.loteriamaven.model.delegate.RemoverDezenas;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.text.SimpleDateFormat;
-
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
@@ -49,8 +45,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private NavigableMap<Integer, Double> resultado_parcial;
     private NavigableMap<Integer, Double> resultado_intermediario;
     private Map<Integer, Double> dezenasOrdenadas;
-    private NavigableMap<LocalDate, ArrayList<Integer>> resultado_final;
-    private ArrayList<String> resultadoPattern;
+    private ArrayList<ArrayList<Integer>> resultado_final;
+    private ArrayList<String> resultado_padrao;
 
     private int totalNumeroSorteios;
     private int total_pares;
@@ -67,6 +63,11 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private int quantidade;
     private int repeticoes;
     private int linha;
+    private DataSource data_neural;
+    private Instances instance_neural;
+    private OneR one_r;
+    private Instance instance_probabilid;
+    private Long millis;
 
     public enum ESPECULACAO_STATUS {
         PAR,
@@ -80,7 +81,8 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             throw new IllegalArgumentException("A quantidade de dezenas não pode ser menor que 29. Por favor escolha um número que seja maior ou igual a 29.");
         this.quantidade = quantidade;
         this.repeticoes = repeticoes;
-        this.resultado_final = new TreeMap<LocalDate, ArrayList<Integer>>();
+        this.resultado_final = new ArrayList<ArrayList<Integer>>();
+        this.millis = System.currentTimeMillis();
     }
 
     @Override
@@ -248,17 +250,41 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
             Map.Entry me = (Map.Entry) it.next();
             novoMapa.add(Integer.parseInt(me.getKey().toString()));
         }
-        this.resultado_final.put(LocalDate.now(), novoMapa);
+        this.resultado_final.add(novoMapa);
+    }
+
+    private void redeNeuralMegaSena(StringBuilder sb, ArrayList<String> resultado_padrao) {
+        try {
+            data_neural = new DataSource("src/main/resources/neuron.arff");
+            instance_neural = data_neural.getDataSet();
+            instance_neural.setClassIndex(7);
+            one_r = new OneR();
+            one_r.buildClassifier(instance_neural);
+            instance_probabilid = new DenseInstance(8);
+            instance_probabilid.setDataset(instance_neural);
+            instance_probabilid.setValue(0, millis);
+            instance_probabilid.setValue(1, Double.parseDouble(resultado_padrao.get(0)));
+            instance_probabilid.setValue(2, Double.parseDouble(resultado_padrao.get(1)));
+            instance_probabilid.setValue(3, Double.parseDouble(resultado_padrao.get(2)));
+            instance_probabilid.setValue(4, Double.parseDouble(resultado_padrao.get(3)));
+            instance_probabilid.setValue(5, Double.parseDouble(resultado_padrao.get(4)));
+            instance_probabilid.setValue(6, Double.parseDouble(resultado_padrao.get(5)));
+            double probabilidade[] = one_r.distributionForInstance(instance_probabilid);
+            sb.append("Sucesso: " + probabilidade[0] + " - Fracasso: " + probabilidade[1] + "\n");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
-    public void executeEspeculacao() {
+    public void executeEspeculacao(boolean toString) {
         // TODO Implement this method
         for (int i = 1; i <= this.repeticoes; i++) {
             this.linha = i;
             executeEspeculacaoMenorMaior();
             executeEspeculacaoParImpar();
-            System.out.print(this.toString() + "\n");
+            if (toString)
+                System.out.println(this.toString());
         }
     }
 
@@ -385,7 +411,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     @Override
     public String toString() {
         // TODO Implement this method
-        this.resultadoPattern = new ArrayList<String>();
+        this.resultado_padrao = new ArrayList<String>();
         NavigableMap<Integer, Double> res = sorteio.getResultado_intermediario();
         int last = res.lastKey();
         StringBuilder sb = new StringBuilder();
@@ -393,46 +419,26 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
         for (Map.Entry entry : res.entrySet()) {
             if (Integer.parseInt(entry.getKey().toString()) == last) {
                 sb.append(entry.getKey() + "\n");
-                resultadoPattern.add(entry.getKey().toString());
+                resultado_padrao.add(entry.getKey().toString());
                 break;
             }
-            resultadoPattern.add(entry.getKey().toString());
+            resultado_padrao.add(entry.getKey().toString());
             sb.append(entry.getKey() + " - ");
         }
-
-        try {
-            DataSource ds = new DataSource("src/main/resources/neuron.arff");
-            Instances ins = ds.getDataSet();
-            ins.setClassIndex(7);
-            OneR nb = new OneR();
-            nb.buildClassifier(ins);
-            Instance novo = new DenseInstance(8);
-            novo.setDataset(ins);
-            Long millis = System.currentTimeMillis();
-            novo.setValue(0, millis);
-            novo.setValue(1, Double.parseDouble(resultadoPattern.get(0)));
-            novo.setValue(2, Double.parseDouble(resultadoPattern.get(1)));
-            novo.setValue(3, Double.parseDouble(resultadoPattern.get(2)));
-            novo.setValue(4, Double.parseDouble(resultadoPattern.get(3)));
-            novo.setValue(5, Double.parseDouble(resultadoPattern.get(4)));
-            novo.setValue(6, Double.parseDouble(resultadoPattern.get(5)));
-            double probabilidade[] = nb.distributionForInstance(novo);
-            System.out.println("Sucesso: " + probabilidade[0] + " - Fracasso: " + probabilidade[1]);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        this.redeNeuralMegaSena(sb, this.resultado_padrao);
         return sb.toString();
     }
+
 
     public NavigableMap<Integer, Double> getResultado_intermediario() {
         return resultado_intermediario;
     }
 
-    public TreeMap<LocalDate, ArrayList<Integer>> getResultado_final() {
-        return (TreeMap<LocalDate, ArrayList<Integer>>) resultado_final;
+    public ArrayList<ArrayList<Integer>> getResultado_final() {
+        return resultado_final;
     }
 
-    public ArrayList<String> getResultadoPattern() {
-        return resultadoPattern;
+    public ArrayList<String> getResultado_padrao() {
+        return resultado_padrao;
     }
 }

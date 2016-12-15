@@ -26,6 +26,6 @@ public class Loteria {
     public static void main(String[] args) {
         SorteioBuilder sorteio = new SorteioBuilder(45, 10);
         LoteriaDirector director = new LoteriaDirector(sorteio);
-        sorteio = director.buildSorteio();
+        sorteio = director.buildSorteio(true);
     }
 }
