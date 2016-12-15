@@ -1,8 +1,6 @@
 package com.wta.loteriamaven.model.delegate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.NavigableMap;
 
 public interface RemoverDezenas {
     /**

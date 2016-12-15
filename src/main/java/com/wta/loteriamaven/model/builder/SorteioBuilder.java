@@ -37,7 +37,6 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private PreparedStatement p_stmt;
     private ResultSet rs;
     private Connection conn;
-
     private HashMap<Integer, Double> dezenasPeso;
     private HashMap<Integer, LocalDate> intervalosDezenas;
     private HashMap<Integer, Long> intervalosUltimoSorteio;
@@ -47,7 +46,6 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private Map<Integer, Double> dezenasOrdenadas;
     private ArrayList<ArrayList<Integer>> resultado_final;
     private ArrayList<String> resultado_padrao;
-
     private int totalNumeroSorteios;
     private int total_pares;
     private int total_impares;
@@ -68,7 +66,7 @@ public class SorteioBuilder extends LoteriaBuilder implements RandomDezena, Remo
     private OneR one_r;
     private Instance instance_probabilid;
     private Long millis;
-
+    
     public enum ESPECULACAO_STATUS {
         PAR,
         IMPAR,
