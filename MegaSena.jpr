@@ -18,6 +18,7 @@
       <string v="oracle.mds.internal.dt.ide.MDSADFLibVirtualNodeCSProvider/mdsLibVirtualNodeContentSet"/>
       <string v="oracle.bm.commonIde.data.project.ModelerProjectSettings/modelersContentSet"/>
       <string v="oracle.toplink.workbench.addin/toplinkContentSet"/>
+      <string v="oracle.adfdtinternal.model.ide.settings.ADFMSettings/adfmContentSet"/>
    </list>
    <value n="defaultPackage" v="com.wta.loteriamaven"/>
    <hash n="oracle.ide.model.ResourcePaths">
@@ -34,8 +35,10 @@
    <hash n="oracle.ide.model.TechnologyScopeConfiguration">
       <list n="technologyScope">
          <string v="Java"/>
+         <string v="Java-Modeling"/>
          <string v="Maven"/>
          <string v="RESTWebServices"/>
+         <string v="UML"/>
          <string v="XML"/>
       </list>
    </hash>
